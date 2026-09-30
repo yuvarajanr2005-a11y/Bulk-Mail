@@ -28,6 +28,7 @@ function App() {
     const totalemail = emailList.map(function(item){return item.A})
     console.log(totalemail)
     setEmailList(totalemail)
+    
   }
 
   reader.readAsBinaryString(file);
@@ -36,8 +37,7 @@ function App() {
   function send()
   {
     setstatus(true)
-    const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000"
-    axios.post(`${apiUrl.replace(/\/$/, "")}/sendemail`,{msg:msg,emailList:emailList})
+    axios.post("http://localhost:5000/sendemail",{msg:msg,emailList:emailList})
     .then(function(data)
     {
       if(data.data === true)
@@ -47,13 +47,8 @@ function App() {
       }
       else{
         alert("Failed")
+        setstatus(false)
       }
-    })
-    .catch(function(){
-      alert("Failed")
-    })
-    .finally(function(){
-      setstatus(false)
     })
   }
 
@@ -83,6 +78,7 @@ function App() {
 
 
         <button  onClick={send} className="mt-2 bg-blue-950 py-2 px-2 text-white font-medium rounded-md w-fit">{status?"Sending...":"Send"}</button>
+ 
 
 
 

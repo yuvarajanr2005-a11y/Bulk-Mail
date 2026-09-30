@@ -1,18 +1,30 @@
 const express = require("express")
 const cors = require("cors")
-require("dotenv").config()
-
 const app = express()
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || true,
+  origin: true,
   credentials: true,
   methods: ["GET", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Origin", "X-Requested-With", "Accept"]
 }))
 
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Origin, X-Requested-With, Accept");
+  res.send();
+});
+
 app.use(express.json())
 
+//Install NODEMAILER
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
@@ -21,7 +33,7 @@ const transporter = nodemailer.createTransport({
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
   },
-});ch
+});
 
 const emailTemplate = (message, recipient) => ({
     from: process.env.GMAIL_USER,
@@ -51,10 +63,6 @@ const sendMails = ({ msg, message, emailList = [] }) => {
 };
 
 app.post("/sendemail",function(req,res){
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-      return res.status(503).send(false);
-    }
-
     sendMails(req.body)
       .then((response) => {
         console.log(response)
@@ -62,15 +70,10 @@ app.post("/sendemail",function(req,res){
       })
       .catch((error) => {
         console.error(error);
-        res.status(500).send(false);
+        res.send(false);
       })
 })
 
-if (require.main === module) {
-  const port = process.env.PORT || 5000
-  app.listen(port, function(){
-    console.log(`Server started on port ${port}`)
-  })
-}
-
-module.exports = app
+app.listen(process.env.PORT || 5000,function(){
+    console.log("Server Started.....")
+})
